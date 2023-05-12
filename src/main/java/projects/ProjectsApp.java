@@ -12,7 +12,9 @@ public class ProjectsApp {
 
   //@formatter:off
   private List<String> operations = List.of(
-      "1) Add aproject"
+      "1) Add aproject", 
+      "2) List projects",
+      "3) Select a project"
       );
   //@formatter:on
 
@@ -21,6 +23,9 @@ public class ProjectsApp {
 
   // Creating project service object
   ProjectService projectService = new ProjectService();
+  
+  // Creating instance variable type project 
+  private Project currentProject;
 
   
   /**
@@ -53,6 +58,14 @@ public class ProjectsApp {
           case 1:
             createProject();
             break;
+            
+          case 2:
+            listProjects();
+            break;
+            
+          case 3:
+            selectProject();
+            break;
 
           default:
             System.out.println("\n" + selection + " is not a valid selection. Try again.");
@@ -66,6 +79,34 @@ public class ProjectsApp {
   }
 
   
+  /**
+   * A method prints list of projects on the console, get user selection, 
+   * and fetch project detail based on the user selection.
+   */
+  private void selectProject() {
+    listProjects();
+    
+    Integer projectId = getIntInput("Enter a project ID to select a project");
+    
+    currentProject = null;
+    currentProject = projectService.fetchProjectById(projectId);
+  }
+
+
+  /**
+   * A method prints list of projects on the console.
+   */
+  private void listProjects() {
+    List<Project> projects = projectService.fetchAllProjects();
+    
+    System.out.println("\nProjects:");
+    
+    projects.forEach(project -> System.out.println(
+        "  " + project.getProjectId() + ": " + project.getProjectName()));
+    
+  }
+
+
   /**
    * Accepting and validating user inputs for a project row then call the project service to create the row.
    */
@@ -209,12 +250,18 @@ public class ProjectsApp {
   }
 
   /**
-   * A method prints list of operation on the console.
+   * A method prints list of operation on the console and current project if it is not null.
    */
   private void printOperations() {
     System.out.println("\nThese are the available selections. Press the Enter key to quite:");
     // Printing out every element from operation list
     operations.forEach(line -> System.out.println("  " + line));
+    
+    if(Objects.isNull(currentProject)) {
+      System.out.println("\nYou are not working with a project.");
+    }else {
+      System.out.println("\nYou are working with a project: " + currentProject);
+    }
   }
 
 }
