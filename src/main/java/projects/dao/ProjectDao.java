@@ -79,6 +79,7 @@ public class ProjectDao extends DaoBase {
     }
   }
 
+  
   /**
    * A method that fetches all projects from database.
    * @return List of all projects
@@ -110,6 +111,7 @@ public class ProjectDao extends DaoBase {
     }
   }
 
+  
   /**
    * A method that fetches a single project from database by a given project ID.
    * @param projectId Integer
@@ -153,6 +155,7 @@ public class ProjectDao extends DaoBase {
     }
   }
 
+  
   /**
    * This method fetches list of categories that associated with a single project by a given project ID.
    * @param conn Connection
@@ -184,6 +187,7 @@ public class ProjectDao extends DaoBase {
     }
   }
 
+  
   /**
    * This method fetches list of steps that associated with a single project by a given project ID.
    * @param conn Connection
@@ -209,6 +213,7 @@ public class ProjectDao extends DaoBase {
     }  
   }
 
+  
   /**
    * This method fetches list of materials that associated with a single project by a given project ID.
    * @param conn Connection
@@ -232,6 +237,87 @@ public class ProjectDao extends DaoBase {
         return materials;
       }
     }  
+  }
+
+ 
+  /**
+   * A method that updates a project from database.
+   * @param project Project object
+   * @return true if the project is updated, false otherwise.
+   * @throws DbException Thrown if an error occurs updating the row.
+   */
+  public boolean modifyProjectDetails(Project project) {
+    // @formatter:off
+    String sql = ""
+        + "UPDATE " + PROJECT_TABLE + " SET "
+        + "project_name = ?, estimated_hours = ?, actual_hours = ?, difficulty = ?, notes = ? "
+        + "WHERE project_id = ?";
+    // @formatter:on
+    
+    try(Connection conn = DbConnection.getConnection()){
+      // start transaction
+      startTransaction(conn);
+      
+      try(PreparedStatement stmt = conn.prepareStatement(sql)){
+        setParameter(stmt, 1, project.getProjectName(), String.class);
+        setParameter(stmt, 2, project.getEstimatedHours(), BigDecimal.class);
+        setParameter(stmt, 3, project.getActualHours(), BigDecimal.class);
+        setParameter(stmt, 4, project.getDifficulty(), Integer.class);
+        setParameter(stmt, 5, project.getNotes(), String.class);
+        setParameter(stmt, 6, project.getProjectId(), Integer.class);
+        
+        boolean updated = stmt.executeUpdate() == 1;
+
+        // Commit transaction
+        commitTransaction(conn);
+        
+        return updated;
+        
+      }catch(SQLException e) {
+        // Roll back transaction if SQL exception happens
+         rollbackTransaction(conn);
+         throw new DbException(e);
+      }
+      
+    }catch(SQLException e) {
+      throw new DbException(e);
+    }
+  }
+
+
+  /**
+   * A method that deletes a project from database by a given project ID.
+   * @param projectId Integer
+   * @return true if the project is deleted, false otherwise.
+   * @throws DbException Thrown if an error occurs deleting the row.
+   */
+  public boolean deleteProject(Integer projectId) {
+    String sql = ""
+        + "DELETE FROM " + PROJECT_TABLE + " WHERE project_id = ?";
+    
+    try(Connection conn = DbConnection.getConnection()){
+      // start transaction
+      startTransaction(conn);
+      
+      try(PreparedStatement stmt = conn.prepareStatement(sql)){
+        setParameter(stmt, 1, projectId, Integer.class);
+        
+        boolean deleted = stmt.executeUpdate() == 1;
+
+        // Commit transaction
+        commitTransaction(conn);
+        
+        return deleted;
+        
+      }catch(SQLException e) {
+        // Roll back transaction if SQL exception happens
+         rollbackTransaction(conn);
+         throw new DbException(e);
+      }
+      
+    }catch(SQLException e) {
+      throw new DbException(e);
+    }
   }
 
 }
