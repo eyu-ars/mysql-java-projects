@@ -14,7 +14,9 @@ public class ProjectsApp {
   private List<String> operations = List.of(
       "1) Add aproject", 
       "2) List projects",
-      "3) Select a project"
+      "3) Select a project",
+      "4) Update project details",
+      "5) Delete a project"
       );
   //@formatter:on
 
@@ -66,7 +68,15 @@ public class ProjectsApp {
           case 3:
             selectProject();
             break;
-
+            
+          case 4:
+            updateProjectDetails();
+            break;
+            
+          case 5:
+            deleteProject();
+            break;
+               
           default:
             System.out.println("\n" + selection + " is not a valid selection. Try again.");
             break;
@@ -79,6 +89,69 @@ public class ProjectsApp {
   }
 
   
+  /**
+   * A method prints list of projects on the console, get user project ID selection, 
+   * and delete project detail based on the user selection.
+   */
+  private void deleteProject() {
+    // Calling listProjects method for printing projects on the console
+    listProjects();
+    
+    Integer projectId = getIntInput("Enter the ID of the project to delete");
+    
+    projectService.deleteProject(projectId);
+    System.out.println("Project " + projectId + " was deleted successfully.");
+    
+    // Set currentProject
+    if(Objects.nonNull(currentProject) && currentProject.getProjectId().equals(projectId)) {
+      currentProject = null;
+    }
+    
+  }
+
+
+  /**
+   * A method collects project inputs from user and modified the record.
+   */
+  private void updateProjectDetails() {
+    // Checking if the project is null
+    if(Objects.isNull(currentProject)) {
+      System.out.println("\nPlease select a project.");
+      return;
+    }
+
+    /*
+     * Collecting project inputs for modification 
+     */
+    String projectName = getStringInput("Enter the project name [" + currentProject.getProjectName() + "]");
+    BigDecimal estimatedHours = getDecimalInput("Enter the estimated hours [" + currentProject.getEstimatedHours() + "]");
+    BigDecimal actualHours = getDecimalInput("Enter the actual hours [" + currentProject.getActualHours() + "]");
+    Integer difficulty = getIntInput("Enter the project difficulty (1-5) [" + currentProject.getDifficulty() + "]");
+    
+    // Calling checkDifficultyInputIsValid for validation
+    checkDifficultyInputIsValid(difficulty);
+
+    String notes = getStringInput("Enter the project notes [" + currentProject.getNotes() + "]");
+
+    // Creating project object type of Project
+    Project project = new Project();
+
+    /*
+     * Accessing project setters
+     */
+    project.setProjectName(Objects.isNull(projectName) ? currentProject.getProjectName() : projectName);
+    project.setEstimatedHours(Objects.isNull(estimatedHours) ? currentProject.getEstimatedHours() : estimatedHours);
+    project.setActualHours(Objects.isNull(actualHours) ? currentProject.getActualHours() : actualHours);
+    project.setDifficulty(Objects.isNull(difficulty) ? currentProject.getDifficulty() : difficulty);
+    project.setNotes(Objects.isNull(projectName) ? currentProject.getNotes() : notes);
+    project.setProjectId(currentProject.getProjectId());
+
+    // Calling modifyProjectDetails method from project service to update a project
+    projectService.modifyProjectDetails(project);
+    currentProject = projectService.fetchProjectById(currentProject.getProjectId());   
+  }
+
+
   /**
    * A method prints list of projects on the console, get user selection, 
    * and fetch project detail based on the user selection.
@@ -154,7 +227,7 @@ public class ProjectsApp {
     int difficulty = Objects.isNull(prompt) ? -1 : prompt;
 
     // Checking the difficulty is in valid range (1-5)
-    if (difficulty < 0 || difficulty > 6) {
+    if (difficulty < 0 || difficulty > 5) {
       throw new DbException(difficulty + " is not a valid difficulty input.");
     }
 
