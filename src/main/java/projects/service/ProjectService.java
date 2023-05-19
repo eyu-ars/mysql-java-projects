@@ -19,6 +19,7 @@ public class ProjectService {
     return projectDao.insertProject(project);
   }
 
+  
   /**
    * Calls the project DAO to retrieve all projects.
    * @return A list of project records
@@ -27,6 +28,7 @@ public class ProjectService {
     return projectDao.fetchAllProjects();
   }
 
+  
   /**
    * Calls the project DAO to get a single project details, including materials, steps, and
    * categories. If the project ID is invalid, it throws an exception.
@@ -36,6 +38,28 @@ public class ProjectService {
   public Project fetchProjectById(Integer projectId) {
     return projectDao.fetchProjectById(projectId).
         orElseThrow(() -> new DbException("Project with project ID=" + projectId + " does not exist."));
+  }
+
+
+  /**
+   * A method calls the DAO class to update a project row.
+   * @param project The {@link Project} object.
+   */
+  public void modifyProjectDetails(Project project) {
+    if(!projectDao.modifyProjectDetails(project)) {
+      throw new DbException("Project with ID=" + project.getProjectId() + " does not exist.");
+    }    
+  }
+
+
+  /**
+   * A method calls the DAO class to delete a project row.
+   * @param projectId The project ID
+   */
+  public void deleteProject(Integer projectId) {
+    if(!projectDao.deleteProject(projectId)) {
+      throw new DbException("Project with ID=" + projectId + " does not exist.");
+    }    
   }
 
 }
